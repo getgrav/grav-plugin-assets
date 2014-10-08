@@ -1,0 +1,15 @@
+{
+   "project":"grav-plugin-assets",
+   "platforms":{
+      "grav":{
+         "nodes":{
+            "plugin":[
+               {
+                  "source":"/",
+                  "destination":"/user/plugins/assets"
+               }
+            ]
+         }
+      }
+   }
+}
