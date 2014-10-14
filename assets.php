@@ -49,6 +49,11 @@ class AssetsPlugin extends Plugin
      */
     public function onPageInitialized()
     {
+        if ($this->isAdmin()) {
+            $this->active = false;
+            return;
+        }
+
         $page = $this->grav['page'];
 
         $content = $page->content();
