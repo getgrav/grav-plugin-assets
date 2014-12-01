@@ -12,7 +12,8 @@ class AssetsPlugin extends Plugin
     /**
      * @return array
      */
-    public static function getSubscribedEvents() {
+    public static function getSubscribedEvents()
+    {
         return [
             'onPageInitialized' => ['onPageInitialized', 0]
         ];
@@ -66,7 +67,7 @@ class AssetsPlugin extends Plugin
                 $action = $matches[1][$x];
                 $order = $matches[2][$x] ?: null;
                 $data = trim(strip_tags($matches[3][$x], '<link><script>'));
-                $content = str_replace($matches[0][$x],'',$content);
+                $content = str_replace($matches[0][$x], '', $content);
 
                 if ($action == 'css' || $action == 'js') {
                     $entries = explode("\n", $data);
