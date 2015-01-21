@@ -15,7 +15,7 @@ class AssetsPlugin extends Plugin
     public static function getSubscribedEvents()
     {
         return [
-            'onPageInitialized' => ['onPageInitialized', 0]
+            'onPageContentRaw' => ['onPageContentRaw', 0]
         ];
     }
 
@@ -48,7 +48,7 @@ class AssetsPlugin extends Plugin
      * }
      * {/assets}
      */
-    public function onPageInitialized()
+    public function onPageContentRaw()
     {
         if ($this->isAdmin()) {
             $this->active = false;
