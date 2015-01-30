@@ -59,17 +59,17 @@ class AssetsPlugin extends Plugin
 
         $content = $page->content();
 
-        preg_match_all('#(?:<p>)?{assets:(.+?)(?: order:(.+?))?}(.*?){\/assets}(?:</p>)?(?:\n)?#smi', $content, $matches);
+        preg_match_all('/(?:<p>)?{assets(?:\:(.+?))?(?: order:(.+?))?}\s?(.*?)\s?{\/assets}(?:<\/p>)?(?:\n)?/smi', $content, $matches);
 
         $count = count($matches[0]);
         if ($count) {
             for ($x=0; $x<$count; $x++) {
-                $action = $matches[1][$x];
+                $action = $matches[1][$x] ?: null;
                 $order = $matches[2][$x] ?: null;
                 $data = trim(strip_tags($matches[3][$x], '<link><script>'));
                 $content = str_replace($matches[0][$x], '', $content);
 
-                if ($action == 'css' || $action == 'js') {
+                if ($action == 'css' || $action == 'js' || $action == null) {
                     $entries = explode("\n", $data);
                     foreach ($entries as $entry) {
                         $this->grav['assets']->add($entry, $order);
