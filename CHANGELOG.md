@@ -1,3 +1,10 @@
+# v1.0.4
+## 02/05/2015
+
+1. [](#improved)
+    * REGEX optimizations
+    * Code improvements
+
 # v1.0.3
 ## 01/23/2015
 
