@@ -12,6 +12,11 @@ keywords: assets, javascript, css, inline
 bugs: https://github.com/getgrav/grav-plugin-assets/issues
 license: MIT
 
+dependencies:
+  - afterburner2
+  - github: https://github.com/getgrav/grav-plugin-github.git
+  - email: https://rhuk@bitbucket.org/rockettheme/grav-plugin-email.git
+
 form:
   validation: strict
   fields:
