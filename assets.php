@@ -3,6 +3,7 @@ namespace Grav\Plugin;
 
 use \Grav\Common\Plugin;
 use \Grav\Common\Grav;
+use \Grav\Common\Uri;
 use \Grav\Common\Page\Page;
 
 class AssetsPlugin extends Plugin
@@ -57,34 +58,70 @@ class AssetsPlugin extends Plugin
 
         $page = $this->grav['page'];
 
-        $content = $page->content();
+        $config = $this->mergeConfig($page);
 
-        preg_match_all('/(?:<p>)?{assets(?:\:(.+?))?(?: order:(.+?))?}\s?(.*?)\s?{\/assets}(?:<\/p>)?(?:\n)?/smi', $content, $matches);
+        if ($config->get('enabled')) {
+            $content = $page->content();
 
-        $count = count($matches[0]);
-        if ($count) {
-            for ($x=0; $x<$count; $x++) {
-                $action = $matches[1][$x] ?: null;
-                $order = $matches[2][$x] ?: null;
-                $data = trim(strip_tags($matches[3][$x], '<link><script>'));
-                $content = str_replace($matches[0][$x], '', $content);
+            preg_match_all('/(?:<p>)?{assets(?:\:(.+?))?(?: order:(.+?))?}\s?(.*?)\s?{\/assets}(?:<\/p>)?(?:\n)?/smi', $content, $matches);
 
-                if ($action == 'css' || $action == 'js' || $action == null) {
-                    $entries = explode("\n", $data);
-                    foreach ($entries as $entry) {
-                        $this->grav['assets']->add($entry, $order);
+            $count = count($matches[0]);
+            if ($count) {
+                for ($x=0; $x<$count; $x++) {
+                    $action = $matches[1][$x] ?: null;
+                    $order = $matches[2][$x] ?: null;
+
+                    $data = trim(strip_tags($matches[3][$x], '<link><script>'));
+                    $content = str_replace($matches[0][$x], '', $content);
+
+                    // if not a full URL try to find a page and use it's full path
+                    if (in_array($action, ['css','js']) && !$this->isValidUrl($data)) {
+                        $path_parts = pathinfo($data);
+                        if ($path_parts['dirname'] == '.') {
+                            $asset_page = $page;
+                        } else {
+                            $asset_page = $this->grav['pages']->dispatch($path_parts['dirname'], true);
+                        }
+
+                        if ($asset_page) {
+                            $path = str_replace(GRAV_ROOT, '', $asset_page->path());
+                            $data =  $path . '/' . $path_parts['basename'];
+                        }
                     }
-                } elseif ($action == 'inline_css') {
-                    $this->grav['assets']->addInlineCss($data);
-                } elseif ($action == 'inline_js') {
-                    $this->grav['assets']->addInlineJs($data);
+
+                    if ($action == 'css' || $action == 'js' || $action == null) {
+                        $entries = explode("\n", $data);
+                        foreach ($entries as $entry) {
+                            $this->grav['assets']->add($entry, $order);
+                        }
+                    } elseif ($action == 'inline_css') {
+                        $this->grav['assets']->addInlineCss($data);
+                    } elseif ($action == 'inline_js') {
+                        $this->grav['assets']->addInlineJs($data);
+                    }
+
                 }
 
+                $page->content($content);
+                unset($this->grav['page']);
+                $this->grav['page'] = $page;
             }
+        }
 
-            $page->content($content);
-            unset($this->grav['page']);
-            $this->grav['page'] = $page;
+    }
+
+    /**
+     * @param $url
+     *
+     * @return bool
+     */
+    protected function isValidUrl($url)
+    {
+        $regex = '/^(?:(https?|ftp|telnet):)?\/\/((?:[a-z0-9@:.-]|%[0-9A-F]{2}){3,})(?::(\d+))?((?:\/(?:[a-z0-9-._~!$&\'\(\)\*\+\,\;\=\:\@]|%[0-9A-F]{2})*)*)(?:\?((?:[a-z0-9-._~!$&\'\(\)\*\+\,\;\=\:\/?@]|%[0-9A-F]{2})*))?(?:#((?:[a-z0-9-._~!$&\'\(\)\*\+\,\;\=\:\/?@]|%[0-9A-F]{2})*))?/';
+        if (preg_match($regex, $url)) {
+            return true;
+        } else {
+            return false;
         }
     }
 }
