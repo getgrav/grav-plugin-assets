@@ -27,20 +27,30 @@ You should now have all the plugin files under
 
 >> NOTE: This plugin is a modular component for Grav which requires [Grav](http://github.com/getgrav/grav), the [Error](https://github.com/getgrav/grav-plugin-error) and [Problems](https://github.com/getgrav/grav-plugin-problems) plugins, and a theme to be installed in order to operate.
 
+# Config Defaults
+
+```
+enabled: true
+```
+
+If you need to change any value, then the best process is to copy the [assets.yaml](assets.yaml) file into your `users/config/plugins/` folder (create it if it doesn't exist), and then modify there.  This will override the default settings.
+
 # Usage
 
 Once the plugin is installed you can use the following syntax to add various asset types, where default order is 10 for `js` and `css` types:
 
 ```
 {assets:css order:5}
+custom-style.css
+/blog/some-blog/post/style.css
 //cdnjs.cloudflare.com/ajax/libs/1140/2.0/1140.css
-//theme/css/16pixels.min.css
 http://somesite.com/js/cookies.min.css
 {/assets}
 
 {assets:js order:10}
+custom-script.js
+/blog/some-blog/post/script.js
 //cdnjs.cloudflare.com/ajax/libs/1140/2.0/1140.min.js
-//theme/css/16pixels.min.js
 http://somesite.com/js/cookies.min.js
 {/assets}
 
