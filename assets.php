@@ -71,33 +71,37 @@ class AssetsPlugin extends Plugin
                     $action = $matches[1][$x] ?: null;
                     $order = $matches[2][$x] ?: null;
 
-                    $data = trim(strip_tags($matches[3][$x], '<link><script>'));
+                    $data_string = trim(strip_tags($matches[3][$x], '<link><script>'));
+                    $data = explode("\n", $data_string);
                     $content = str_replace($matches[0][$x], '', $content);
 
                     // if not a full URL try to find a page and use it's full path
-                    if (in_array($action, ['css','js']) && !$this->isValidUrl($data)) {
-                        $path_parts = pathinfo($data);
-                        if ($path_parts['dirname'] == '.') {
-                            $asset_page = $page;
-                        } else {
-                            $asset_page = $this->grav['pages']->dispatch($path_parts['dirname'], true);
-                        }
+                    if (in_array($action, ['css','js'])) {
+                        foreach ($data as $key => $value) {
+                            if (!$this->isValidUrl($value)) {
+                                $path_parts = pathinfo($value);
+                                if ($path_parts['dirname'] == '.') {
+                                    $asset_page = $page;
+                                } else {
+                                    $asset_page = $this->grav['pages']->dispatch($path_parts['dirname'], true);
+                                }
 
-                        if ($asset_page) {
-                            $path = str_replace(GRAV_ROOT, '', $asset_page->path());
-                            $data =  $path . '/' . $path_parts['basename'];
+                                if ($asset_page) {
+                                    $path = str_replace(GRAV_ROOT, '', $asset_page->path());
+                                    $data[$key] =  $path . '/' . $path_parts['basename'];
+                                }
+                            }
                         }
                     }
 
                     if ($action == 'css' || $action == 'js' || $action == null) {
-                        $entries = explode("\n", $data);
-                        foreach ($entries as $entry) {
+                        foreach ($data as $entry) {
                             $this->grav['assets']->add($entry, $order);
                         }
                     } elseif ($action == 'inline_css') {
-                        $this->grav['assets']->addInlineCss($data);
+                        $this->grav['assets']->addInlineCss($data[0]);
                     } elseif ($action == 'inline_js') {
-                        $this->grav['assets']->addInlineJs($data);
+                        $this->grav['assets']->addInlineJs($data[0]);
                     }
 
                 }
