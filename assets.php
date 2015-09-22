@@ -99,9 +99,9 @@ class AssetsPlugin extends Plugin
                             $this->grav['assets']->add($entry, $order);
                         }
                     } elseif ($action == 'inline_css') {
-                        $this->grav['assets']->addInlineCss($data[0]);
+                        $this->grav['assets']->addInlineCss($matches[3][$x]);
                     } elseif ($action == 'inline_js') {
-                        $this->grav['assets']->addInlineJs($data[0]);
+                        $this->grav['assets']->addInlineJs($matches[3][$x]);
                     }
 
                 }
