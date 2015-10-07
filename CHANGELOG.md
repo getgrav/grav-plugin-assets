@@ -1,3 +1,16 @@
+# v1.2.1
+## 10/07/2015
+
+1. [](#bugfix)
+    * Fixed a bug with inline CSS and JS
+
+# v1.2.0
+## 06/23/2015
+
+1. [](#new)
+    * Support for multiple items
+    * added ability to use Grav page refs and local assets + page enable override
+
 # v1.0.4
 ## 02/05/2015
 
