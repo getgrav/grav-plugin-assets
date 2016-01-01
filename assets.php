@@ -2,9 +2,7 @@
 namespace Grav\Plugin;
 
 use \Grav\Common\Plugin;
-use \Grav\Common\Grav;
-use \Grav\Common\Uri;
-use \Grav\Common\Page\Page;
+use RocketTheme\Toolbox\Event\Event;
 
 class AssetsPlugin extends Plugin
 {
@@ -16,7 +14,8 @@ class AssetsPlugin extends Plugin
     public static function getSubscribedEvents()
     {
         return [
-            'onPageContentRaw' => ['onPageContentRaw', 0]
+            'onPageContentRaw' => ['onPageContentRaw', 0],
+            'onPageInitialized' => ['onPageInitialized', 0],
         ];
     }
 
@@ -48,20 +47,22 @@ class AssetsPlugin extends Plugin
      *   var map = new google.maps.Map(mapCanvas, mapOptions);
      * }
      * {/assets}
+     *
+     * @param Event $e
      */
-    public function onPageContentRaw()
+    public function onPageContentRaw(Event $e)
     {
         if ($this->isAdmin()) {
             $this->active = false;
             return;
         }
 
-        $page = $this->grav['page'];
+        $page = $e['page'];
 
         $config = $this->mergeConfig($page);
 
         if ($config->get('enabled')) {
-            $content = $page->content();
+            $content = $e['page']->getRawContent();
 
             preg_match_all('/(?:<p>)?{assets(?:\:(.+?))?(?: order:(.+?))?}\s?(.*?)\s?{\/assets}(?:<\/p>)?(?:\n)?/smi', $content, $matches);
 
@@ -96,23 +97,65 @@ class AssetsPlugin extends Plugin
 
                     if ($action == 'css' || $action == 'js' || $action == null) {
                         foreach ($data as $entry) {
-                            $this->grav['assets']->add($entry, $order);
+//                            $this->grav['assets']->add($entry, $order);
+                            $this->assets[$action] []= [$entry, $order];
                         }
-                    } elseif ($action == 'inline_css') {
-                        $this->grav['assets']->addInlineCss($matches[3][$x]);
-                    } elseif ($action == 'inline_js') {
-                        $this->grav['assets']->addInlineJs($matches[3][$x]);
+                    } elseif ($action == 'inline_css' || $action == 'inline_js') {
+//                        $this->grav['assets']->addInlineCss($matches[3][$x]);
+                        $this->assets[$action] []= $matches[3][$x];
                     }
-
                 }
 
-                $page->content($content);
-                unset($this->grav['page']);
-                $this->grav['page'] = $page;
+                $e['page']->setRawContent($content);
             }
         }
-
     }
+
+    public function onPageInitialized()
+    {
+        if ($this->isAdmin()) {
+            return;
+        }
+
+        $page = $this->grav['page'];
+        $assets = $this->grav['assets'];
+        $cache = $this->grav['cache'];
+
+        // Initialize all page content up front before Twig happens
+        if (isset($page->header()->content['items'])) {
+           foreach ($page->collection() as $item) {
+               $item->content();
+           }
+        } else {
+            $page->content();
+        }
+
+        // Get and set the cache as required
+        $cache_id = md5('assets'.$page->path().$cache->getKey());
+        if (empty($this->assets)) {
+            $this->assets = $cache->fetch($cache_id);
+        } else {
+            $cache->save($cache_id, $this->assets);
+        }
+
+        // if we actually have data now, add it to asset manager
+        if (!empty($this->assets)) {
+            foreach ($this->assets as $type => $asset) {
+                foreach ($asset as $item) {
+                    if (is_array($item)) {
+                        $assets->add($item[0], $item[1]);
+                    } else {
+                        if ($type == 'inline_css') {
+                            $assets->addInlineCss($item);
+                        } elseif ($type == 'inline_js') {
+                            $assets->addInlineJs($item);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 
     /**
      * @param $url

@@ -1,3 +1,12 @@
+# v2.0.0
+## 01/01/2015
+
+1. [](#improved)
+    * Uses Grav cache internally to store assets
+    * Works with modular pages now too
+1. [](#bugfix)
+    * Actually works with page cache enabled now
+
 # v1.2.1
 ## 10/07/2015
 
