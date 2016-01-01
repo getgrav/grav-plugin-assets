@@ -106,11 +106,6 @@ class AssetsPlugin extends Plugin
                     }
                 }
 
-                // save data to cache
-                $cache = $this->grav['cache'];
-                $cache_id = md5('assets'.$page->path().$cache->getKey());
-                $cache->save($cache_id, $this->assets);
-
                 $e['page']->setRawContent($content);
             }
         }
@@ -124,17 +119,26 @@ class AssetsPlugin extends Plugin
 
         $page = $this->grav['page'];
         $assets = $this->grav['assets'];
+        $cache = $this->grav['cache'];
 
-        $content = $page->content();
-
-        // check if we have a local copy first
-        if (empty($this->assets)) {
-            $cache = $this->grav['cache'];
-            $cache_id = md5('assets'.$page->path().$cache->getKey());
-            $this->assets = $cache->fetch($cache_id);
+        // Initialize all page content up front before Twig happens
+        if (isset($page->header()->content['items'])) {
+           foreach ($page->collection() as $item) {
+               $item->content();
+           }
+        } else {
+            $page->content();
         }
 
-        // if we actually have data now...
+        // Get and set the cache as required
+        $cache_id = md5('assets'.$page->path().$cache->getKey());
+        if (empty($this->assets)) {
+            $this->assets = $cache->fetch($cache_id);
+        } else {
+            $cache->save($cache_id, $this->assets);
+        }
+
+        // if we actually have data now, add it to asset manager
         if (!empty($this->assets)) {
             foreach ($this->assets as $type => $asset) {
                 foreach ($asset as $item) {
