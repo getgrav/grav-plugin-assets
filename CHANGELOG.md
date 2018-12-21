@@ -1,3 +1,10 @@
+# v2.0.1
+## 12/21/2018
+
+1. [](#bugfix)
+  * Fire `onPageInitialized` later as it breaks on-page forms
+  * Fixed a spelling error
+
 # v2.0.0
 ## 01/01/2015
 

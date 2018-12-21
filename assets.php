@@ -15,7 +15,7 @@ class AssetsPlugin extends Plugin
     {
         return [
             'onPageContentRaw' => ['onPageContentRaw', 0],
-            'onPageInitialized' => ['onPageInitialized', 0],
+            'onPageInitialized' => ['onPageInitialized', -10],
         ];
     }
 
