@@ -1,5 +1,5 @@
 # v2.0.1
-## mm/dd/2015
+## 12/21/2018
 
 1. [](#bugfix)
   * Fire `onPageInitialized` later as it breaks on-page forms
