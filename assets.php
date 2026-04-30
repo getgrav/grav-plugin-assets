@@ -64,7 +64,7 @@ class AssetsPlugin extends Plugin
         if ($config->get('enabled')) {
             $content = $e['page']->getRawContent();
 
-            preg_match_all('/(?:<p>)?{assets(?:\:(.+?))?(?: order:(.+?))?}\s?(.*?)\s?{\/assets}(?:<\/p>)?(?:\n)?/smi', $content, $matches);
+            preg_match_all('/(?:<p>)?{assets(?:\:(.+?))?(?: order:(.+?))?}\s?(.*?)\s?{\/assets}(?:<\/p>)?(?:\n)?/smi', (string) $content, $matches);
 
             $count = count($matches[0]);
             if ($count) {
@@ -165,7 +165,7 @@ class AssetsPlugin extends Plugin
     protected function isValidUrl($url)
     {
         $regex = '/^(?:(https?|ftp|telnet):)?\/\/((?:[a-z0-9@:.-]|%[0-9A-F]{2}){3,})(?::(\d+))?((?:\/(?:[a-z0-9-._~!$&\'\(\)\*\+\,\;\=\:\@]|%[0-9A-F]{2})*)*)(?:\?((?:[a-z0-9-._~!$&\'\(\)\*\+\,\;\=\:\/?@]|%[0-9A-F]{2})*))?(?:#((?:[a-z0-9-._~!$&\'\(\)\*\+\,\;\=\:\/?@]|%[0-9A-F]{2})*))?/';
-        if (preg_match($regex, $url)) {
+        if (preg_match($regex, (string) $url)) {
             return true;
         } else {
             return false;
