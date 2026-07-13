@@ -73,6 +73,33 @@ h1 {color: red !important;}
 
 > Note: If you want to see this plugin in action, have a look at [Grav Learn Site](http://learn.getgrav.org)
 
+## Per-Page CSS Assets and Grav's Cache
+
+If you use `{assets:css}` to load per-page stylesheets, you may find that the CSS loads correctly on the first visit but disappears on subsequent cached visits, with the site-wide styles taking over.
+
+This plugin stores each page's collected assets in Grav's cache, keyed per page, and re-adds them on cached requests via `onPageInitialized`. If you are using a memory-based cache driver (such as APCu, which is what `auto` typically selects), the small per-page asset cache entry can be evicted under memory pressure while the page HTML cache entry survives. The result is that the page HTML is served from cache but the asset list is gone, so the `<link>` tag for the stylesheet is omitted.
+
+### Recommended fix: set cache driver to `file`
+
+Set the following in `user/config/system.yaml`:
+
+```yaml
+cache:
+  driver: file
+```
+
+The `file` driver does not evict entries under memory pressure, so the per-page asset cache entry will always be available alongside the page cache. On a modern SSD, the `file` driver is also at least as fast as APCu. See [Grav's Performance & Caching documentation](https://learn.getgrav.org/advanced/performance-and-caching) for more details on cache driver options.
+
+### Alternative fix: disable page cache per-page
+
+If switching the cache driver globally is not an option, you can disable Grav's page cache for only the affected pages by adding this to the pages' frontmatter:
+
+```yaml
+cache_enable: false
+```
+
+This forces the `{assets:css}` block to be parsed on every request, so the assets are always collected fresh regardless of the cache driver in use.
+
 # Updating
 
 As development for the Assets plugin continues, new versions may become available that add additional features and functionality, improve compatibility with newer Grav releases, and generally provide a better user experience. Updating Assets is easy, and can be done through Grav's GPM system, as well as manually.
