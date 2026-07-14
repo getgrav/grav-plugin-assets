@@ -1,3 +1,9 @@
+# v2.0.3
+## 07/14/2026
+
+1. [](#improved)
+    * Expanded the README with asset caching recommendations ([#9](https://github.com/getgrav/grav-plugin-assets/pull/9))
+
 # v2.0.2
 ## 04/30/2026
 
